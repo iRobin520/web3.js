@@ -205,9 +205,9 @@ ATokenProvider.prototype.send = function (payload, callback) {
     } else if (payload.method === 'eth_accounts') {
         callback(null,generateCallbackBody(payload.id,_this.address ? [_this.address] : []));
     } else if (payload.method === 'eth_coinbase') {
-        callback(null,_this.address);
+        callback(null,generateCallbackBody(payload.id,_this.address))
     } else if (payload.method === 'net_version') {
-        callback(null,_this.chainId || null);
+        callback(null,generateCallbackBody(payload.id,_this.chainId))
     } else {
         try {
             request.send(JSON.stringify(payload));
