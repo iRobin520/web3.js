@@ -53,6 +53,7 @@ RequestManager.providers = {
     WebsocketProvider: require('web3-providers-ws'),
     HttpProvider: require('web3-providers-http'),
     ATokenProvider: require('web3-providers-atoken'),
+    ATokenHTProvider: require('web3-providers-atoken-ht'),
     IpcProvider: require('web3-providers-ipc')
 };
 

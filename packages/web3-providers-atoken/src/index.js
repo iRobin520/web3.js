@@ -92,6 +92,10 @@ ATokenProvider.prototype.isAToken = function() {
    return true;
 }
 
+ATokenProvider.prototype.isMetaMask = function() {
+    return true;
+}
+
 ATokenProvider.prototype._prepareRequest = function(){
     var request;
     // the current runtime is a browser
