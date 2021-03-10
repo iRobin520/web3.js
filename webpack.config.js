@@ -9,9 +9,9 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin(),
-        new webpack.SourceMapDevToolPlugin({
-            filename: "[file].map",
-        }),
+        // new webpack.SourceMapDevToolPlugin({
+        //     filename: "[file].map",
+        // }),
     ],
     resolve: {
         modules: ["node_modules"],

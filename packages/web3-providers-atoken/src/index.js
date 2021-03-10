@@ -27,6 +27,7 @@ var errors = require('web3-core-helpers').errors;
 var XHR2 = require('xhr2-cookies').XMLHttpRequest; // jshint ignore: line
 var http = require('http');
 var https = require('https');
+var Jsonrpc = require('./jsonrpc.js');
 var dsBridge = require("dsbridge")
 
 /**
@@ -62,13 +63,8 @@ ATokenProvider.prototype.setAddress = function(address){
 }
 
 ATokenProvider.prototype.enable = function(){
-    var _this = this;
-    var payload = {
-        jsonrpc: '2.0',
-        id: 999999999,
-        method: "eth_requestAccounts",
-        params: []
-    }
+    let _this = this;
+    let payload = Jsonrpc.toPayload('eth_requestAccounts', []);
     return new Promise(function (resolve,reject) {
         _this.send(payload,function (error,response){
             if (!error) {
@@ -131,11 +127,11 @@ ATokenProvider.prototype._prepareRequest = function(){
  * @param {Function} callback triggered on end with (err, result)
  */
 ATokenProvider.prototype.send = function (payload, callback) {
-    var _this = this;
-    var request = this._prepareRequest();
+    let _this = this;
+    let request = this._prepareRequest();
 
     //Call native app method
-    var callNativeMethod = function (method,id,params) {
+    let callNativeMethod = function (method,id,params) {
         let methodName = 'eth.' + method;
         var parameters = {};
         parameters['name'] = method;
@@ -177,7 +173,11 @@ ATokenProvider.prototype.send = function (payload, callback) {
                 error = errors.InvalidResponse(request.responseText);
             }
             _this.connected = true;
-            callback(error, result);
+            if (typeof callback == 'function') {
+                callback(error, result);
+            } else {
+                return Promise.resolve(result)
+            }
         }
     };
 
@@ -188,7 +188,7 @@ ATokenProvider.prototype.send = function (payload, callback) {
 
     //Override the call native methods
     if (payload.method === 'isConnected') {
-        return true;
+        callback(null,generateCallbackBody(payload.id,true))
     } else if (payload.method === 'eth_requestAccounts') {
         callNativeMethod('requestAccounts',payload.id,{});
     } else if (payload.method === 'eth_sign') {
@@ -216,6 +216,8 @@ ATokenProvider.prototype.send = function (payload, callback) {
         callback(null,generateCallbackBody(payload.id,_this.address))
     } else if (payload.method === 'net_version') {
         callback(null,generateCallbackBody(payload.id,_this.chainId))
+    } else if (payload.method === 'eth_chainId') {
+        callback(null,generateCallbackBody(payload.id,_this.chainId))
     } else {
         try {
             request.send(JSON.stringify(payload));
@@ -224,6 +226,24 @@ ATokenProvider.prototype.send = function (payload, callback) {
             callback(errors.InvalidConnection(this.host));
         }
     }
+};
+
+ATokenProvider.prototype.request = function (data) {
+    var _this = this;
+    if (window.ethereum) {
+        _this = window.ethereum;
+    }
+    const { method, params } = data
+    const payload = Jsonrpc.toPayload(method, params);
+    return new Promise(function (resolve,reject) {
+        _this.send(payload,function (error,response){
+            if (!error) {
+                resolve(response.result);
+            } else {
+                reject(error);
+            }
+        });
+    });
 };
 
 ATokenProvider.prototype.disconnect = function () {
