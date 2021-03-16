@@ -54,6 +54,7 @@ RequestManager.providers = {
     HttpProvider: require('web3-providers-http'),
     ATokenProvider: require('web3-providers-atoken'),
     ATokenHTProvider: require('web3-providers-atoken-ht'),
+    ATokenBNBProvider: require('web3-providers-atoken-bnb'),
     IpcProvider: require('web3-providers-ipc')
 };
 
