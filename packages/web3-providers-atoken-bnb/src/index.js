@@ -27,6 +27,7 @@ var errors = require('web3-core-helpers').errors;
 var XHR2 = require('xhr2-cookies').XMLHttpRequest; // jshint ignore: line
 var http = require('http');
 var https = require('https');
+var Jsonrpc = require('./jsonrpc.js');
 var dsBridge = require("dsbridge")
 
 /**
@@ -224,6 +225,24 @@ ATokenBNBProvider.prototype.send = function (payload, callback) {
             callback(errors.InvalidConnection(this.host));
         }
     }
+};
+
+ATokenBNBProvider.prototype.request = function (data) {
+    var _this = this;
+    if (window.ethereum) {
+        _this = window.ethereum;
+    }
+    const { method, params } = data
+    const payload = Jsonrpc.toPayload(method, params);
+    return new Promise(function (resolve,reject) {
+        _this.send(payload,function (error,response){
+            if (!error) {
+                resolve(response.result);
+            } else {
+                reject(error);
+            }
+        });
+    });
 };
 
 ATokenBNBProvider.prototype.disconnect = function () {
