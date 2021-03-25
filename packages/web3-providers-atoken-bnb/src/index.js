@@ -178,7 +178,11 @@ ATokenBNBProvider.prototype.send = function (payload, callback) {
                 error = errors.InvalidResponse(request.responseText);
             }
             _this.connected = true;
-            callback(error, result);
+            if (typeof callback == 'function') {
+                callback(error, result);
+            } else {
+                return Promise.resolve(result)
+            }
         }
     };
 
